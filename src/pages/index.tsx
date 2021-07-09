@@ -11,6 +11,7 @@ import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { Product, products } from "../model";
+import api from "../services";
 
 interface ProductsListPageProps {
   products: Product[];
@@ -61,8 +62,7 @@ export default ProductsListPage;
 
 export const getServerSideProps: GetServerSideProps<ProductsListPageProps> =
   async () => {
-    const res = await fetch(`http://app:3000/api/products`);
-    const data = await res.json();
+    const { data } = await api.get('products')
 
     return { props: { products: data } };
   };

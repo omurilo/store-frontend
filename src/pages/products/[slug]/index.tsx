@@ -7,11 +7,13 @@ import {
   CardMedia,
   Typography,
 } from "@material-ui/core";
+import axios from "axios";
 import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
 import Link from "next/link";
 import { Product } from "../../../model";
+import api from "../../../services";
 
 interface ProductDetailPageProps {
   product: Product;
@@ -65,16 +67,11 @@ export const getStaticProps: GetStaticProps<
   const { slug } = context.params!;
 
   try {
-    const res = await fetch(`http://app:3000/api/products/${slug}`);
-    if (res.status === 404) {
-      throw res;
-    }
-
-    const data = await res.json();
+    const { data } = await api.get(`products/${slug}`);
 
     return { props: { product: data }, revalidate: 1 * 60 * 2 };
   } catch (error) {
-    if (error.status === 404) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
       return { notFound: true };
     }
 
@@ -83,8 +80,7 @@ export const getStaticProps: GetStaticProps<
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const res = await fetch(`http://app:3000/api/products`);
-  const data: Product[] = await res.json();
+  const { data } = await api.get<Product[]>(`products`);
 
   const paths = data.map((product) => ({
     params: { slug: product.slug },

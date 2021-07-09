@@ -9,9 +9,11 @@ import {
   Button,
   Box,
 } from "@material-ui/core";
+import axios from "axios";
 import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
 import { Product } from "../../../model";
+import api from "../../../services";
 
 interface OrderPageProps {
   product: Product;
@@ -92,16 +94,11 @@ export const getServerSideProps: GetServerSideProps<
   const { slug } = context.params!;
 
   try {
-    const res = await fetch(`http://app:3000/api/products/${slug}`);
-    if (res.status === 404) {
-      throw res;
-    }
-
-    const data = await res.json();
+    const { data } = await api.get(`products/${slug}`);
 
     return { props: { product: data } };
   } catch (error) {
-    if (error.status === 404) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
       return { notFound: true };
     }
 
