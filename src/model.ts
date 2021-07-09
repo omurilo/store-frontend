@@ -8,12 +8,35 @@ export interface Product {
   created_at: string;
 }
 
+export enum OrderStatus {
+  Approved = "approved",
+  Pending = "pending",
+  Rejected = "rejected",
+}
+
 export interface CreditCard {
   number: string;
   name: string;
   expiration_month: number;
   expiration_year: number;
   cvv: string;
+}
+
+export interface OrderItem {
+  id: string;
+  quantity: number;
+  price: number;
+  product_id: string;
+  product: Product;
+  order_id: string;
+}
+
+export interface Order {
+  id: string;
+  total: number;
+  credit_card: Omit<CreditCard, "cvv" | "name">;
+  status: OrderStatus;
+  items: OrderItem[];
 }
 
 export const products: Product[] = [

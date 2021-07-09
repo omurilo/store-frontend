@@ -35,7 +35,7 @@ const OrderPage: NextPage<OrderPageProps> = ({ product }) => {
         items: [{ product_id: product.id, quantity: 1 }],
       });
 
-    console.log(order);
+      router.push(`/orders/${order.id}`);
     } catch (error) {
       console.log(axios.isAxiosError(error) ? error.response?.data : error);
       enqueueSnackbar("Erro ao realizar sua compra", { variant: "error" });
