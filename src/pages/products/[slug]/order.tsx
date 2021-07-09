@@ -11,7 +11,9 @@ import {
 } from "@material-ui/core";
 import axios from "axios";
 import { GetServerSideProps, NextPage } from "next";
+import { useRouter } from "next/dist/client/router";
 import Head from "next/head";
+import { useSnackbar } from "notistack";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { CreditCard, Product } from "../../../model";
@@ -22,15 +24,22 @@ interface OrderPageProps {
 }
 
 const OrderPage: NextPage<OrderPageProps> = ({ product }) => {
+  const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const { register, handleSubmit, setValue } = useForm();
 
   const onSubmit = async (data: CreditCard) => {
-    const { data: order } = await api.post("orders", {
-      credit_card: data,
-      items: [{ product_id: product.id, quantity: 1 }],
-    });
+    try {
+      const { data: order } = await api.post("orders", {
+        credit_card: data,
+        items: [{ product_id: product.id, quantity: 1 }],
+      });
 
     console.log(order);
+    } catch (error) {
+      console.log(axios.isAxiosError(error) ? error.response?.data : error);
+      enqueueSnackbar("Erro ao realizar sua compra", { variant: "error" });
+    }
   };
 
   const handleChange =
