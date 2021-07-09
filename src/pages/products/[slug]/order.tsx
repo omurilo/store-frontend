@@ -12,7 +12,9 @@ import {
 import axios from "axios";
 import { GetServerSideProps, NextPage } from "next";
 import Head from "next/head";
-import { Product } from "../../../model";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { CreditCard, Product } from "../../../model";
 import api from "../../../services";
 
 interface OrderPageProps {
@@ -20,6 +22,22 @@ interface OrderPageProps {
 }
 
 const OrderPage: NextPage<OrderPageProps> = ({ product }) => {
+  const { register, handleSubmit, setValue } = useForm();
+
+  const onSubmit = async (data: CreditCard) => {
+    const { data: order } = await api.post("orders", {
+      credit_card: data,
+      items: [{ product_id: product.id, quantity: 1 }],
+    });
+
+    console.log(order);
+  };
+
+  const handleChange =
+    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValue(field, +e.target.value);
+    };
+
   return (
     <div>
       <Head>
@@ -40,13 +58,19 @@ const OrderPage: NextPage<OrderPageProps> = ({ product }) => {
       <Typography component="h2" variant="h6" gutterBottom>
         Pague com seu cartão de crédito
       </Typography>
-      <form>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
-            <TextField label="Nome no cartão" required fullWidth />
+            <TextField
+              {...register("name")}
+              label="Nome no cartão"
+              required
+              fullWidth
+            />
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
+              {...register("number")}
               label="Número do cartão"
               required
               fullWidth
@@ -54,12 +78,20 @@ const OrderPage: NextPage<OrderPageProps> = ({ product }) => {
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <TextField type="number" label="CVV" required fullWidth />
+            <TextField
+              {...register("cvv")}
+              type="number"
+              label="CVV"
+              required
+              fullWidth
+            />
           </Grid>
           <Grid item xs={12} md={6}>
             <Grid container spacing={3}>
               <Grid item xs={6}>
                 <TextField
+                  {...register("expiration_month")}
+                  onChange={handleChange("expiration_month")}
                   type="number"
                   label="Expiração mês"
                   required
@@ -68,6 +100,8 @@ const OrderPage: NextPage<OrderPageProps> = ({ product }) => {
               </Grid>
               <Grid item xs={6}>
                 <TextField
+                  {...register("expiration_year")}
+                  onChange={handleChange("expiration_year")}
                   type="number"
                   label="Expiração ano"
                   required
